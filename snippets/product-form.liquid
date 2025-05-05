@@ -1,0 +1,594 @@
+{%- form 'product', product, id: form_id, class: 'product-single__form' -%}
+
+  <!-- Expose the store's money_with_currency_format so we see the symbol -->
+  <script>
+    window.moneyWithCurrencyFormat = "{{ shop.money_with_currency_format | escape }}";
+  </script>
+
+  {%- liquid
+    assign gift_card_recipient_feature_active = false
+    if block.settings.show_gift_card_recipient and product.gift_card?
+      assign gift_card_recipient_feature_active = true
+    endif
+
+    assign enable_dynamic_buttons = false
+    if show_dynamic_checkout and template != 'product.preorder' and gift_card_recipient_feature_active == false
+      assign enable_dynamic_buttons = true
+    endif
+
+    assign needs_text = product.metafields.custom.needstext
+  -%}
+
+  {%- if gift_card_recipient_feature_active -%}
+    {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+  {%- endif -%}
+
+  <!-- Add letters input with no default value, only placeholder, if needs_text is true -->
+  {%- if needs_text == true -%}
+    <div class="variant-wrapper js" data-type="text">
+      <label class="variant__label" for="Letters-{{ section_id }}-{{ product.id }}">
+        {{ 'general.productform.pleaseletters' | t }}
+      </label>
+      <div class="variant-input-wrap">
+        <input
+          type="text"
+          id="Letters-{{ section_id }}-{{ product.id }}"
+          name="properties[- Letters]"
+          class="variant__input"
+          placeholder="{{ 'general.productform.enterletters' | t }}"
+          maxlength="1"
+          pattern="[A-Za-z]{1,8}"
+          title="{{ 'general.productform.18letters' | t }}"
+        >
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if enable_dynamic_buttons -%}
+    <div class="payment-buttons">
+  {%- endif -%}
+
+    {%- liquid
+      assign default_text = 'products.product.add_to_cart' | t
+      assign button_text = 'products.product.add_to_cart' | t
+      if template contains 'preorder'
+        assign default_text = 'products.product.preorder' | t
+        assign button_text = 'products.product.preorder' | t
+      endif
+      unless current_variant.available
+        assign button_text = 'products.product.sold_out' | t
+      endunless
+    -%}
+
+    {%- assign show_diamond = false -%}
+    {%- for coll in product.collections -%}
+      {%- if coll.title == "Custom Ring" or coll.title == "Custom Earrings" or coll.title == "Custom Necklace" or coll.title == "Create Your Own" -%}
+        {%- assign show_diamond = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if show_diamond -%}
+      <!-- Diamond Type -->
+      <div class="variant-wrapper variant-wrapper--dropdown js" data-type="dropdown">
+        <label class="variant__label" for="DiamondTypeSelect" style="color: white;">Diamond Type</label>
+        <div class="variant-input-wrap" data-index="diamond" data-handle="diamond-type">
+          <select id="DiamondTypeSelect"
+                  name="diamond_type"
+                  class="variant__input"
+                  style="border: 1px solid white; color: white;">
+            <option value="lab-grown">Lab‑Grown</option>
+            <option value="natural">Natural</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Carat Size -->
+      <div class="variant-wrapper variant-wrapper--dropdown js" data-type="dropdown" style="margin-top: 10px;">
+        <label class="variant__label" for="CaratSizeSelect" style="color: white;">Carat Size</label>
+        <div class="variant-input-wrap" data-index="caratsize" data-handle="carat-size">
+          <select id="CaratSizeSelect"
+                  name="carat_size"
+                  class="variant__input"
+                  style="border: 1px solid white; color: white;">
+            <option value="0.5">0.5</option>
+            <option value="1">1</option>
+            <option value="1.5">1.5</option>
+            <option value="2">2</option>
+            <option value="2.5">2.5</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <button
+      {% if product.empty? %}type="button"{% else %}type="submit"{% endif %}
+      name="add"
+      data-add-to-cart
+      class="btn btn--full add-to-cart{% if enable_dynamic_buttons and product.selling_plan_groups == empty %} btn--secondary{% endif %}"
+      {% unless current_variant.available %} disabled="disabled"{% endunless %}>
+      <span data-add-to-cart-text data-default-text="{{ default_text }}">
+        {{ button_text }}
+      </span>
+    </button>
+
+    {%- if enable_dynamic_buttons -%}
+      {{ form | payment_button }}
+    {%- endif -%}
+
+  {%- if enable_dynamic_buttons -%}
+    </div>
+  {%- endif -%}
+
+  <div class="shopify-payment-terms product__policies">{{ form | payment_terms }}</div>
+
+  <!-- Use money_with_currency so the dropdown also shows symbols -->
+  <select name="id" data-product-select class="product-single__variants no-js">
+    {%- for variant in product.variants -%}
+      {%- if variant.available -%}
+        <option {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}
+                value="{{ variant.id }}"
+                data-material="{{ variant.options[0] }}"
+                data-letter-count="{{ variant.options[1] }}">
+          {{ variant.title }} - {{ variant.price | money_with_currency }}
+        </option>
+      {%- else -%}
+        <option disabled="disabled">
+          {{ variant.title }} - {{ 'products.product.sold_out' | t }}
+        </option>
+      {%- endif -%}
+    {%- endfor -%}
+  </select>
+
+{%- endform -%}
+
+{% assign earringsFound = false %}
+{% for coll in product.collections %}
+  {% if coll.title == "Create Earrings" %}
+    {% assign earringsFound = true %}
+  {% endif %}
+{% endfor %}
+<script>
+  var isEarringsCollection = {{ earringsFound }};
+  var needsText = {{ needs_text | json }};
+  var productVariants = {{ product.variants | json }};
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const diamondTypeSelect = document.getElementById('DiamondTypeSelect');
+  const caratSizeSelect = document.getElementById('CaratSizeSelect');
+  const lettersInput = document.querySelector('input[name="properties[- Letters]"]');
+  const addToCartForm = document.querySelector('#{{ form_id }}');
+  const variantSelect = addToCartForm.querySelector('[data-product-select]');
+  const priceEl = document.getElementById('ProductPrice-{{ section_id }}') || document.querySelector('[data-product-price]');
+  const compareAtPriceWrap = document.querySelector('[data-product-price-wrap]');
+  const compareAtPriceEl = document.querySelector('[data-compare-price]');
+  const savePriceEl = document.querySelector('[data-save-price]');
+  const priceA11y = document.querySelector('[data-a11y-price]');
+  const comparePriceA11y = document.querySelector('[data-compare-price-a11y]');
+
+  if (!addToCartForm || !priceEl || !variantSelect) {
+    console.error('Error: Form, price element, or variant select not found.');
+    return;
+  }
+
+  const hasDiamondOptions = diamondTypeSelect && caratSizeSelect;
+  const isDiamondProduct = {{ show_diamond | json }};
+
+  // Ensure dropdown options are not disabled
+  function enableDropdownOptions() {
+    if (diamondTypeSelect) {
+      Array.from(diamondTypeSelect.options).forEach(option => {
+        option.removeAttribute('disabled');
+      });
+    }
+    if (caratSizeSelect) {
+      Array.from(caratSizeSelect.options).forEach(option => {
+        option.removeAttribute('disabled');
+      });
+    }
+  }
+
+  // Run initially
+  enableDropdownOptions();
+
+  // Run whenever the variant changes (Shopify's variant selector might re-disable them)
+  document.addEventListener('variant:change', enableDropdownOptions);
+
+  // Save initial base price and compare-at price from the HTML
+  if (!priceEl.hasAttribute('data-base-price')) {
+    const basePrice = parseFloat(priceEl.textContent.replace(/[^0-9\.]/g, '')) || 0;
+    priceEl.setAttribute('data-base-price', basePrice);
+  }
+
+  if (compareAtPriceEl && !compareAtPriceEl.hasAttribute('data-base-compare-at-price')) {
+    const baseCompareAtPrice = parseFloat(compareAtPriceEl.textContent.replace(/[^0-9\.]/g, '')) || 0;
+    compareAtPriceEl.setAttribute('data-base-compare-at-price', baseCompareAtPrice);
+  }
+
+  const roundDiamondMapping = {
+    "natural-0.5":  { variantId: "41101925154901", extra: 1800 },
+    "natural-1":    { variantId: "41101925187669", extra: 7500 },
+    "natural-1.5":  { variantId: "41101925220437", extra: 17500 },
+    "natural-2":    { variantId: "41101925253205", extra: 27000 },
+    "natural-2.5":  { variantId: "41101925285973", extra: 45000 },
+    "natural-3":    { variantId: "41101925318741", extra: 62000 },
+    "natural-4":    { variantId: "41101925351509", extra: 120000 },
+    "natural-5":    { variantId: "41101925384277", extra: 170000 },
+    "natural-6":    { variantId: "41101925417045", extra: 210000 },
+    "natural-7":    { variantId: "41101925449813", extra: 300000 },
+    "natural-8":    { variantId: "41101925482581", extra: 450000 },
+    "lab-grown-0.5": { variantId: "41101925515349", extra: 400 },
+    "lab-grown-1":   { variantId: "41101925548117", extra: 1200 },
+    "lab-grown-1.5": { variantId: "41101925580885", extra: 2500 },
+    "lab-grown-2":   { variantId: "41101925613653", extra: 3500 },
+    "lab-grown-2.5": { variantId: "41101925646421", extra: 4500 },
+    "lab-grown-3":   { variantId: "41101925679189", extra: 6000 },
+    "lab-grown-4":   { variantId: "41101925711957", extra: 7000 },
+    "lab-grown-5":   { variantId: "41101925744725", extra: 9000 },
+    "lab-grown-6":   { variantId: "41101925777493", extra: 11000 },
+    "lab-grown-7":   { variantId: "41101925810261", extra: 13000 },
+    "lab-grown-8":   { variantId: "41101925843029", extra: 15000 }
+  };
+
+  const shapeHandles = {
+    cushion:  'cushion-diamond',
+    radiant:  'radiant-diamond',
+    princess: 'princess-diamond',
+    asscher:  'asscher-diamond',
+    marquise: 'marquise-diamond',
+    oval:     'oval-diamond',
+    emerald:  'emerald-diamond',
+    heart:    'heart-diamond',
+    pear:     'pear-diamond'
+  };
+
+  const shapeMappingsCache = {};
+  let currentDiamondMapping = roundDiamondMapping;
+
+  function getSelectedShape() {
+    const shapeInput = document.querySelector('input[name="Shape"]:checked');
+    return shapeInput ? shapeInput.value.trim().toLowerCase() : null;
+  }
+
+  function buildMappingFromProduct(product) {
+    const mapping = {};
+    product.variants.forEach(variant => {
+      let type = variant.options[0].toLowerCase().trim();
+      let carat = variant.options[1].toLowerCase().trim();
+
+      if (type.includes('lab-grown')) type = 'lab-grown';
+      else if (type.includes('natural')) type = 'natural';
+
+      carat = carat.replace(' carat', '');
+      carat = parseFloat(carat).toString();
+
+      mapping[`${type}-${carat}`] = {
+        variantId: variant.id,
+        extra: parseFloat(variant.price) / 100
+      };
+    });
+    return mapping;
+  }
+
+  function fetchDiamondMapping(productHandle, callback) {
+    if (shapeMappingsCache[productHandle]) {
+      callback(shapeMappingsCache[productHandle]);
+      return;
+    }
+    fetch(`/products/${productHandle}.js`)
+      .then(response => response.json())
+      .then(data => {
+        const newMapping = buildMappingFromProduct(data);
+        shapeMappingsCache[productHandle] = newMapping;
+        callback(newMapping);
+      })
+      .catch(err => {
+        console.error(`Error fetching ${productHandle}.js:`, err);
+        callback(null);
+      });
+  }
+
+  function updateLetterInputLimit() {
+    if (!needsText || !lettersInput) return;
+
+    const selectedVariantId = variantSelect.value;
+    if (!selectedVariantId) return;
+
+    const selectedVariant = productVariants.find(v => v.id.toString() === selectedVariantId);
+    if (!selectedVariant) {
+      console.error('Selected variant not found:', selectedVariantId);
+      return;
+    }
+
+    const selectedLetterCount = selectedVariant.options[1];
+
+    lettersInput.setAttribute('maxlength', selectedLetterCount);
+    lettersInput.setAttribute('pattern', `[A-Za-z]{1,${selectedLetterCount}}`);
+    lettersInput.setAttribute('title', `Please enter 1-${selectedLetterCount} letters (A-Z)`);
+
+    if (lettersInput.value.length > parseInt(selectedLetterCount)) {
+      lettersInput.value = lettersInput.value.substring(0, parseInt(selectedLetterCount));
+    }
+  }
+
+  function updateDiamondPrice() {
+    const shape = getSelectedShape();
+    const diamondType = diamondTypeSelect.value.trim().toLowerCase();
+    const caratSize = caratSizeSelect.value.trim();
+    const comboKey = `${diamondType}-${caratSize}`;
+
+    if (!shape || shape === 'round') {
+      currentDiamondMapping = roundDiamondMapping;
+      applyPriceUpdate(comboKey);
+      return;
+    }
+
+    let handle = shapeHandles[shape];
+    if (!handle) {
+      currentDiamondMapping = roundDiamondMapping;
+      applyPriceUpdate(comboKey);
+      return;
+    }
+
+    let productHandle = handle;
+    if (isEarringsCollection) {
+      productHandle = handle.replace('diamond', 'diamonds');
+    }
+
+    fetchDiamondMapping(productHandle, function(fetchedMapping) {
+      currentDiamondMapping = fetchedMapping || roundDiamondMapping;
+      applyPriceUpdate(comboKey);
+    });
+  }
+
+  function applyPriceUpdate(comboKey, newBasePrice, newCompareAtPrice) {
+    let basePrice = newBasePrice !== undefined ? newBasePrice : parseFloat(priceEl.getAttribute('data-base-price')) || 0;
+    let baseCompareAtPrice = newCompareAtPrice !== undefined ? newCompareAtPrice : parseFloat(compareAtPriceEl.getAttribute('data-base-compare-at-price')) || 0;
+
+    if (newBasePrice !== undefined) {
+      priceEl.setAttribute('data-base-price', basePrice);
+      if (newCompareAtPrice !== undefined) {
+        compareAtPriceEl.setAttribute('data-base-compare-at-price', baseCompareAtPrice);
+      }
+    }
+
+    if (isDiamondProduct) {
+      const variantData = currentDiamondMapping[comboKey];
+      if (!variantData) {
+        console.error('No matching diamond variant for:', comboKey);
+        return;
+      }
+
+      const diamondExtra = variantData.extra;
+      const newPriceFloat = basePrice + diamondExtra;
+      const basePriceFull = baseCompareAtPrice;
+      const diamondExtraFull = diamondExtra / 0.85;
+      const basePriceSavings = basePriceFull - basePrice;
+      const diamondSavings = diamondExtraFull - diamondExtra;
+      const totalSavings = basePriceSavings + diamondSavings;
+      const totalSavingsRounded = Math.round(totalSavings);
+
+      priceEl.textContent = formatPrice(newPriceFloat);
+      if (compareAtPriceEl) {
+        const newCompareFloat = basePriceFull + diamondExtraFull;
+        const newCompareFloatRounded = Math.round(newCompareFloat);
+        if (newCompareFloatRounded > newPriceFloat) {
+          compareAtPriceEl.textContent = formatPrice(newCompareFloatRounded);
+          compareAtPriceWrap.classList.remove('hide');
+          comparePriceA11y.setAttribute('aria-hidden', 'false');
+          priceA11y.setAttribute('aria-hidden', 'false');
+        } else {
+          compareAtPriceWrap.classList.add('hide');
+          comparePriceA11y.setAttribute('aria-hidden', 'true');
+          priceA11y.setAttribute('aria-hidden', 'true');
+        }
+      }
+      if (savePriceEl) {
+        if (totalSavingsRounded > 0) {
+          savePriceEl.textContent = `Save ${formatPrice(totalSavingsRounded)}`;
+          savePriceEl.classList.remove('hide');
+        } else {
+          savePriceEl.classList.add('hide');
+        }
+      }
+    } else {
+      const newPriceFloat = basePrice;
+      const newCompareFloat = baseCompareAtPrice;
+
+      priceEl.textContent = formatPrice(newPriceFloat);
+      if (compareAtPriceEl) {
+        if (newCompareFloat > newPriceFloat) {
+          compareAtPriceEl.textContent = formatPrice(newCompareFloat);
+          compareAtPriceWrap.classList.remove('hide');
+          priceEl.classList.add('on-sale');
+          comparePriceA11y.setAttribute('aria-hidden', 'false');
+          priceA11y.setAttribute('aria-hidden', 'false');
+          const savings = newCompareFloat - newPriceFloat;
+          const savingsRounded = Math.round(savings);
+          if (savePriceEl) {
+            savePriceEl.textContent = `Save ${formatPrice(savingsRounded)}`;
+            savePriceEl.classList.remove('hide');
+          }
+        } else {
+          compareAtPriceWrap.classList.add('hide');
+          priceEl.classList.remove('on-sale');
+          comparePriceA11y.setAttribute('aria-hidden', 'true');
+          priceA11y.setAttribute('aria-hidden', 'true');
+          if (savePriceEl) savePriceEl.classList.add('hide');
+        }
+      }
+    }
+  }
+
+  function formatPrice(num) {
+    const amountInCents = Math.round(num * 100);
+    if (typeof Shopify !== 'undefined' && Shopify.formatMoney && window.moneyWithCurrencyFormat) {
+      return Shopify.formatMoney(amountInCents, window.moneyWithCurrencyFormat);
+    }
+    return (amountInCents / 100).toLocaleString(undefined, {
+      style: 'currency',
+      currency: (Shopify && Shopify.currency && Shopify.currency.active) || 'USD'
+    });
+  }
+
+  window.currentVariant = null;
+
+  document.addEventListener('variant:change', function(event) {
+    const variant = event.detail.variant;
+    if (variant) {
+      window.currentVariant = variant;
+      const newBasePrice = parseFloat(variant.price) / 100;
+      const newCompareAtPrice = variant.compare_at_price ? parseFloat(variant.compare_at_price) / 100 : 0;
+      if (isDiamondProduct && hasDiamondOptions) {
+        const diamondType = diamondTypeSelect.value.trim().toLowerCase();
+        const caratSize = caratSizeSelect.value.trim();
+        const comboKey = `${diamondType}-${caratSize}`;
+        applyPriceUpdate(comboKey, newBasePrice, newCompareAtPrice);
+      } else {
+        applyPriceUpdate(null, newBasePrice, newCompareAtPrice);
+      }
+      updateLetterInputLimit();
+    }
+  });
+
+  variantSelect.addEventListener('change', updateLetterInputLimit);
+
+  if (needsText && lettersInput) {
+    lettersInput.addEventListener('input', function() {
+      if (isDiamondProduct && hasDiamondOptions) {
+        const diamondType = diamondTypeSelect.value.trim().toLowerCase();
+        const caratSize = caratSizeSelect.value.trim();
+        const comboKey = `${diamondType}-${caratSize}`;
+        applyPriceUpdate(comboKey);
+      }
+    });
+  }
+
+  addToCartForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const mainVariantId = addToCartForm.querySelector('[data-product-select]').value;
+    if (!mainVariantId) {
+      alert('Please select a product variant.');
+      return;
+    }
+
+    const selectedVariant = productVariants.find(v => v.id.toString() === mainVariantId);
+    if (!selectedVariant) {
+      alert('Selected variant not found.');
+      return;
+    }
+    const selectedLetterCount = selectedVariant.options[1];
+
+    const formData = {
+      items: [{
+        id: mainVariantId,
+        quantity: 1,
+        properties: {}
+      }]
+    };
+
+    let letters = '';
+    if (needsText) {
+      const lettersInput = addToCartForm.querySelector('input[name="properties[- Letters]"]');
+      letters = lettersInput ? lettersInput.value.trim().toUpperCase() : '';
+
+      if (letters.length !== parseInt(selectedLetterCount)) {
+        alert(`{{ 'general.productform.enterexactly1' | t }} ${selectedLetterCount} {{ 'general.productform.letter' | t }}${selectedLetterCount > 1 ? 's' : ''}.`);
+        return;
+      }
+
+      formData.items[0].properties['- Letters'] = letters;
+    }
+
+    if (isDiamondProduct) {
+      const shape = getSelectedShape();
+      const diamondType = diamondTypeSelect.value.trim().toLowerCase();
+      const caratSize = caratSizeSelect.value.trim();
+      const comboKey = `${diamondType}-${caratSize}`;
+
+      function processSubmission() {
+        const variantData = currentDiamondMapping[comboKey];
+        if (!variantData) {
+          alert('Please select a valid diamond option.');
+          return;
+        }
+        formData.items.push({ id: variantData.variantId, quantity: 1 });
+        submitToCart(formData);
+      }
+
+      if (!shape || shape === 'round') {
+        currentDiamondMapping = roundDiamondMapping;
+        processSubmission();
+        return;
+      }
+
+      let handle = shapeHandles[shape];
+      if (!handle) {
+        currentDiamondMapping = roundDiamondMapping;
+        processSubmission();
+        return;
+      }
+      let productHandle = handle;
+      if (isEarringsCollection) productHandle = handle.replace('diamond', 'diamonds');
+
+      fetchDiamondMapping(productHandle, function(fetchedMapping) {
+        currentDiamondMapping = fetchedMapping || roundDiamondMapping;
+        processSubmission();
+      });
+    } else {
+      submitToCart(formData);
+    }
+  });
+
+  function submitToCart(formData) {
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`Network response was not ok: ${res.statusText}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log('Product added:', data);
+      if (needsText) {
+        console.log('Product added with letters:', data);
+      }
+      if (typeof $ !== 'undefined') $('body').trigger('added.ajaxProduct');
+      if (typeof updateRecommendations === 'function') updateRecommendations();
+      document.dispatchEvent(new CustomEvent('ajaxProduct:added', { bubbles: true }));
+    })
+    .catch(error => {
+      console.error('Error adding item to cart:', error);
+      alert('There was an error adding the item to your cart. Please try again.');
+    });
+  }
+
+  console.log('DiamondTypeSelect:', diamondTypeSelect);
+  console.log('CaratSizeSelect:', caratSizeSelect);
+
+  if (hasDiamondOptions) {
+    diamondTypeSelect.addEventListener('change', updateDiamondPrice);
+    caratSizeSelect.addEventListener('change', updateDiamondPrice);
+    const shapeOptions = document.querySelectorAll('input[name="Shape"]');
+    shapeOptions.forEach(input => input.addEventListener('change', updateDiamondPrice));
+  }
+
+  updateLetterInputLimit();
+  if (hasDiamondOptions) {
+    updateDiamondPrice();
+  }
+});
+</script>

@@ -1,0 +1,325 @@
+{%- if settings.cart_type == 'drawer' -%}
+  <!-- Expose the store's money_with_currency_format as JSON to preserve symbols -->
+  <script>
+    window.moneyWithCurrencyFormat = {{ shop.money_with_currency_format | json }};
+  </script>
+
+  <div id="CartDrawer" class="drawer drawer--right">
+    <form id="CartDrawerForm" action="{{ routes.cart_url }}" method="post" novalidate class="drawer__contents" data-location="cart-drawer">
+      <div class="drawer__fixed-header">
+        <div class="drawer__header appear-animation appear-delay-1">
+          <div class="h2 drawer__title">{{ 'cart.general.title' | t }}</div>
+          <div class="drawer__close">
+            <button type="button" class="drawer__close-button js-drawer-close">
+              <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-close" viewBox="0 0 64 64">
+                <title>icon-X</title>
+                <path d="m19 17.61 27.12 27.13m0-27.12L19 44.74"/>
+              </svg>
+              <span class="icon__fallback-text">{{ 'cart.general.close_cart' | t }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer__inner">
+        <div class="cart__urgency-timer" style="margin-top: 10px; text-align: center; background-color: #2a2b2c; color: white; font-size: 18px; padding: 10px; border-radius: 5px; margin-bottom: -15px; letter-spacing: 1px; line-height: 1.4;">
+          <svg style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;" aria-hidden="true" focusable="false" role="presentation" class="icon icon-clock" viewBox="0 0 20 20">
+            <path fill="#fff" d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v5h-2zm0 0h2v5h-2z"/>
+          </svg>
+          <span style="font-weight: bold;">{{ 'cart.urgency_timer.discount_off' | t: discount: 15 }}</span>
+          <span class="timer-text">{{ 'cart.urgency_timer.ends_in' | t }}</span>
+          <span id="countdown-timer" style="font-weight: bold; animation: pulse 1.5s infinite;">4:49</span><br>
+          <span style="font-size: 14px; color: #fff;">
+            (<span class="timer-text">{{ 'cart.urgency_timer.save' | t }}</span>
+            <span id="discount-amount"></span>)
+          </span>
+          <span id="discount-amount-formatted" style="display: none;"></span>
+        </div>
+
+        <style>
+          @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+          }
+          @media (max-width: 768px) {
+            .cart__urgency-timer {
+              font-size: 16px;
+              padding: 8px;
+            }
+            .cart__urgency-timer svg {
+              width: 14px;
+              height: 14px;
+            }
+          }
+          .cart__checkout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 20px !important;
+            line-height: 1.2;
+          }
+          .cart__checkout .you-save-text {
+            font-size: 12px;
+            color: #1c1d1d;
+            margin-top: 2px;
+          }
+          .was-price s {
+            color: white;
+            text-decoration: line-through;
+          }
+        </style>
+
+        <script>
+          function startTimer(duration, display) {
+            let timer = duration, hours, minutes, seconds;
+            setInterval(function () {
+              hours = parseInt(timer / 3600, 10);
+              minutes = parseInt((timer % 3600) / 60, 10);
+              seconds = parseInt(timer % 60, 10);
+              minutes = minutes < 10 ? "0" + minutes : minutes;
+              seconds = seconds < 10 ? "0" + seconds : seconds;
+              display.textContent = minutes + ":" + seconds; // Updated to mm:ss format
+              if (--timer < 0) { timer = duration; }
+            }, 1000);
+          }
+
+          // Extract currency symbol from a formatted price string
+          function extractCurrencySymbol(formattedPrice) {
+            // Remove numeric values, decimals, commas, and spaces to isolate the symbol
+            return formattedPrice.replace(/[0-9.,\s]/g, '').trim();
+          }
+
+          // Format price with a fallback using the extracted currency symbol
+          function formatPrice(amountInCents, fallbackFormattedPrice) {
+            let formatted = '';
+            if (typeof Shopify !== 'undefined' && typeof Shopify.formatMoney === 'function') {
+              let format = window.moneyWithCurrencyFormat || '{{amount}}';
+              formatted = Shopify.formatMoney(amountInCents, format);
+              // Check if the formatted price includes a currency symbol
+              if (/[0-9]/.test(formatted) && !/[^\d\s.,]/.test(formatted.replace(/[0-9.,\s]/g, ''))) {
+                formatted = ''; // Reset if no symbol is present
+              }
+            }
+            if (!formatted && fallbackFormattedPrice) {
+              const currencySymbol = extractCurrencySymbol(fallbackFormattedPrice);
+              const amount = amountInCents / 100;
+              // Use toLocaleString to format the number with thousands separator
+              const formattedAmount = amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              });
+              // Determine symbol position based on the fallback price (before or after)
+              const symbolFirst = fallbackFormattedPrice.startsWith(currencySymbol);
+              formatted = symbolFirst ? `${currencySymbol}${formattedAmount}` : `${formattedAmount}${currencySymbol}`;
+            }
+            return formatted || (amountInCents / 100).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }); // Final fallback
+          }
+
+          function updateDiscountAmount() {
+            // Get the initial subtotal element to extract the currency symbol
+            const subtotalElement = document.querySelector('[data-subtotal]');
+            const fallbackFormattedPrice = subtotalElement ? subtotalElement.textContent.trim() : '{{ cart.total_price | money_with_currency }}';
+
+            fetch('/cart.js')
+              .then(response => response.json())
+              .then(cart => {
+                const discountedPriceInCents = cart.total_price;
+                const discountRate = 0.15;
+                const rawFullPrice = discountedPriceInCents / (1 - discountRate);
+                let difference = rawFullPrice - discountedPriceInCents;
+                difference = Math.round(difference / 100) * 100;
+                const finalFullPrice = discountedPriceInCents + difference;
+
+                // Format all prices with the fallback method
+                const formattedDiscount = formatPrice(difference, fallbackFormattedPrice);
+                const formattedSubtotal = formatPrice(discountedPriceInCents, fallbackFormattedPrice);
+                const formattedFullPrice = formatPrice(finalFullPrice, fallbackFormattedPrice);
+
+                // Update timer section "Save" amount
+                const discountElement = document.querySelector('#discount-amount');
+                if (discountElement) discountElement.innerHTML = formattedDiscount;
+                const discountFormattedElement = document.querySelector('#discount-amount-formatted');
+                if (discountFormattedElement) discountFormattedElement.innerHTML = formattedDiscount;
+
+                // Update checkout button "You Save" amount
+                const youSaveElement = document.querySelector('#you-save-amount');
+                if (youSaveElement) youSaveElement.innerHTML = formattedDiscount;
+                const youSaveFormattedElement = document.querySelector('#you-save-amount-formatted');
+                if (youSaveFormattedElement) youSaveFormattedElement.innerHTML = formattedDiscount;
+
+                // Update subtotal
+                if (subtotalElement) subtotalElement.innerHTML = formattedSubtotal;
+
+                // Update "Was" price
+                const wasPriceElement = document.querySelector('[data-was-price]');
+                if (wasPriceElement) wasPriceElement.innerHTML = formattedFullPrice;
+              })
+              .catch(error => {
+                console.error('Error fetching cart:', error);
+                const elements = ['#discount-amount', '#you-save-amount', '[data-subtotal]', '[data-was-price]'];
+                elements.forEach(selector => {
+                  const element = document.querySelector(selector);
+                  if (element) element.textContent = 'Error';
+                });
+              });
+          }
+
+          function updateCartNoteWithLetters() {
+            fetch('/cart.js')
+              .then(response => response.json())
+              .then(cart => {
+                let noteLines = [];
+                cart.items.forEach(item => {
+                  // Check if the item has a Letters property
+                  if (item.properties && item.properties['- Letters']) {
+                    let productType = 'Item';
+                    // Determine product type based on product_type or title
+                    if (item.product_type.toLowerCase().includes('bracelet')) {
+                      productType = 'Bracelet';
+                    } else if (item.product_type.toLowerCase().includes('necklace')) {
+                      productType = 'Necklace';
+                    } else if (item.title.toLowerCase().includes('bracelet')) {
+                      productType = 'Bracelet';
+                    } else if (item.title.toLowerCase().includes('necklace')) {
+                      productType = 'Necklace';
+                    }
+                    const letters = item.properties['- Letters'];
+                    noteLines.push(`Letter ${productType}: ${letters}`);
+                  }
+                });
+                const newNote = noteLines.join('\n');
+                // Only update if the note has changed to avoid unnecessary API calls
+                if (cart.note !== newNote) {
+                  fetch('/cart/update.js', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ note: newNote })
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    console.log('Cart note updated:', data.note);
+                    // Update the cart note textarea if it exists
+                    const cartNoteTextarea = document.querySelector('#CartNoteDrawer');
+                    if (cartNoteTextarea) {
+                      cartNoteTextarea.value = newNote;
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error updating cart note:', error);
+                  });
+                }
+              })
+              .catch(error => {
+                console.error('Error fetching cart for note update:', error);
+              });
+          }
+
+          document.addEventListener('DOMContentLoaded', function () {
+            let fourMinutesFortyNine = 4 * 60 + 49,
+                display = document.querySelector('#countdown-timer');
+            startTimer(fourMinutesFortyNine, display);
+            setTimeout(() => {
+              updateDiscountAmount();
+              updateCartNoteWithLetters();
+            }, 500);
+            document.addEventListener('cart:updated', () => {
+              updateDiscountAmount();
+              updateCartNoteWithLetters();
+            });
+            document.addEventListener('ajaxProduct:added', () => {
+              updateDiscountAmount();
+              updateCartNoteWithLetters();
+            });
+          });
+
+          // Ensure currency and note updates if Shopify changes it
+          if (typeof Shopify !== 'undefined' && Shopify.onCartUpdate) {
+            Shopify.onCartUpdate = function(cart) {
+              updateDiscountAmount();
+              updateCartNoteWithLetters();
+            };
+          }
+        </script>
+
+        <div class="drawer__scrollable">
+          <div data-products class="appear-animation appear-delay-2"></div>
+          {% if settings.cart_notes_enable %}
+            <div class="appear-animation appear-delay-3">
+              <label for="CartNoteDrawer">{{ 'cart.general.note' | t }}</label>
+              <textarea name="note" class="input-full cart-notes" id="CartNoteDrawer">{{ cart.note }}</textarea>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="drawer__footer appear-animation appear-delay-4">
+          <div data-discounts>
+            {% if cart.cart_level_discount_applications != blank %}
+              <div class="cart__discounts cart__item-sub cart__item-row">
+                <div>{{ 'cart.general.discounts' | t }}</div>
+                <div class="text-right">
+                  {% for cart_discount in cart.cart_level_discount_applications %}
+                    <div class="cart__discount">
+                      {{ cart_discount.title }} (-{{ cart_discount.total_allocated_amount | money_with_currency }})
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="cart__item-sub" style="margin-bottom: 5px !important;">
+            <div class="ajaxcart__subtotal">{{ 'general.productform.was' | t }}</div>
+            <div class="was-price"><s data-was-price>{{ cart.total_price | money_with_currency }}</s></div>
+          </div>
+
+          <div class="cart__item-sub" style="margin-bottom: 5px !important;">
+            <div class="ajaxcart__subtotal">{{ 'cart.general.delivery' | t }}</div>
+            <div>{{ 'cart.general.free' | t }}</div>
+          </div>
+
+          <div class="cart__item-sub">
+            <div class="ajaxcart__subtotal">{{ 'cart.general.subtotal' | t }}</div>
+            <div data-subtotal>{{ cart.total_price | money_with_currency }}</div>
+          </div>
+
+          {% if settings.cart_terms_conditions_enable %}
+            <div class="cart__item-row cart__terms">
+              <input type="checkbox" id="CartTermsDrawer" class="cart__terms-checkbox">
+              <label for="CartTermsDrawer">
+                {% if settings.cart_terms_conditions_page != blank %}
+                  {{ 'cart.general.terms_html' | t: url: settings.cart_terms_conditions_page.url }}
+                {% else %}
+                  {{ 'cart.general.terms' | t }}
+                {% endif %}
+              </label>
+            </div>
+          {% endif %}
+
+          <div class="cart__checkout-wrapper">
+            <button type="submit" name="checkout" data-terms-required="{{ settings.cart_terms_conditions_enable }}" class="btn cart__checkout shake-button">
+              <span style="font-size: 14px;">{{ 'cart.general.checkout' | t }}</span>
+              <div class="you-save-text">
+                {{ 'cart.urgency_timer.you_save' | t }} <span id="you-save-amount"></span>
+                <span id="you-save-amount-formatted" style="display: none;"></span>
+              </div>
+            </button>
+
+            {% if additional_checkout_buttons and settings.cart_additional_buttons %}
+              <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
+                {{ content_for_additional_checkout_buttons }}
+              </div>
+            {% endif %}
+          </div>
+  </div>
+      </div>
+    </form>
+  </div>
+{%- endif -%}

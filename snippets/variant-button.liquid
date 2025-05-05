@@ -1,0 +1,212 @@
+{%- assign swatch_file_extension = 'png' -%}
+
+{%- capture size_chart_title -%}
+  {{ 'products.general.size_chart' | t }}
+  <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-size-chart" viewBox="0 0 64 64">
+    <path d="M22.39 33.53c-7.46 0-13.5-3.9-13.5-8.72s6-8.72 13.5-8.72 13.5 3.9 13.5 8.72a12 12 0 0 1-.22 1.73"/>
+    <ellipse cx="22.39" cy="24.81" rx="3.28" ry="2.12"/>
+    <path d="M8.89 24.81V38.5c0 7.9 6.4 9.41 14.3 9.41h31.92V33.53H22.39m24.39 0v7.44m-8.13-7.44v7.44m-8.13-7.44v7.44m-8.13-7.44v7.44"/>
+  </svg>
+{%- endcapture -%}
+
+{%- assign is_size = false -%}
+{%- assign size_trigger = 'products.general.size_trigger' | t | downcase -%}
+{%- assign downcased_option = option.name | downcase -%}
+
+{%- comment %}
+  Determine if this is a material/color or shape option based on index and metafields
+{%- endcomment -%}
+{%- assign option_index = forloop.index -%}
+{% capture option_key %}option{{ option_index }}{% endcapture %}
+{%- assign is_material = false -%}
+{%- assign is_shape = false -%}
+
+{%- comment %}
+  Option 1 is always material/color, Option 2 is always shape (adjust as needed)
+{%- endcomment -%}
+{%- if option_index == 1 -%}
+  {%- assign is_material = true -%}
+{%- elsif option_index == 2 -%}
+  {%- assign is_shape = true -%}
+{%- endif -%}
+
+{%- comment %}
+  Fallback: Check metafields to confirm material or shape
+{%- endcomment -%}
+{%- for variant in product.variants -%}
+  {%- if variant.metafields.custom.original_color3 != blank and option_key == 'option1' -%}
+    {%- assign is_material = true -%}
+    {%- break -%}
+  {%- endif -%}
+  {%- if variant.metafields.custom.original_shape3 != blank and option_key == 'option2' -%}
+    {%- assign is_shape = true -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if downcased_option contains size_trigger -%}
+  {%- assign is_size = true -%}
+{%- endif -%}
+
+{%- comment %}
+  Set group handle based on material or shape
+{%- endcomment -%}
+{%- if is_shape -%}
+  {%- assign group_handle = 'shape' -%}
+{%- elsif is_material -%}
+  {%- assign group_handle = 'select-your-material' -%}
+{%- else -%}
+  {%- assign group_handle = option.name | handleize -%}
+{%- endif -%}
+
+<div class="variant-wrapper js" data-type="{% if is_material %}dropdown{% else %}button{% endif %}">
+  <label class="variant__label{% if option.name == 'Default' or option.name == 'Title' %} hidden-label{% endif %}{% unless variant_labels %} hidden-label{% endunless %}" for="ProductSelect-{{ section_id }}-{{ product.id }}-option-{{ forloop.index0 }}">
+    {{ option.name }}
+    {%- if connect_to_sizechart and is_size -%}
+      <!-- Size chart trigger code, if any -->
+    {%- endif -%}
+  </label>
+
+  {%- if is_material -%}
+    <div class="variant-input-wrap" data-index="option{{ option_index }}" data-handle="{{ group_handle }}">
+      <div class="material-swatch-container">
+        <select
+          form="{{ form_id }}"
+          data-variant-input
+          id="ProductSelect-{{ section_id }}-{{ product.id }}-option-{{ forloop.index0 }}"
+          data-index="option{{ option_index }}"
+          class="variant__input material-dropdown"
+          data-color-option
+          data-color-index="{{ color_option_index }}"
+        >
+          {%- for value in option.values -%}
+            {%- liquid
+              assign variant_label_state = true
+              if product.options.size == 1
+                unless product.variants[forloop.index0].available
+                  assign variant_label_state = false
+                endunless
+              endif
+              assign matching_variant = product.variants | where: option_key, value | first
+              assign english_color = matching_variant.metafields.custom.original_color3 | default: value
+              assign color_file_name = english_color | replace: ' ', '-' | downcase | append: '.' | append: swatch_file_extension
+              assign color_image = color_file_name | file_img_url: '1000x1000' | prepend: 'https:' | split: '?' | first
+            -%}
+            <option
+              value="{{ value | escape }}"
+              {% if option.selected_value == value %} selected="selected"{% endif %}
+              {% unless variant_label_state %} disabled="disabled"{% endunless %}
+              name="{{ option.name }}"
+              class="variant-input"
+              data-index="option{{ option_index }}"
+              data-color-name="{{ english_color | escape }}"
+              data-color-image="{{ color_image }}"
+            >
+              {{ value }}
+            </option>
+          {%- endfor -%}
+        </select>
+        <div class="material-swatch-preview" id="material-swatch-{{ section_id }}-{{ product.id }}-option-{{ forloop.index0 }}">
+          {%- assign selected_value = option.selected_value -%}
+          {%- assign matching_variant = product.variants | where: option_key, selected_value | first -%}
+          {%- assign english_color = matching_variant.metafields.custom.original_color3 | default: selected_value -%}
+          {%- assign color_file_name = english_color | replace: ' ', '-' | downcase | append: '.' | append: swatch_file_extension -%}
+          {%- assign color_image = color_file_name | file_img_url: '1000x1000' | prepend: 'https:' | split: '?' | first -%}
+          <span
+            class="color-swatch color-swatch--{{ english_color | handle }}"
+            style="background-image: url({{ color_image }})"
+            data-color-name="{{ english_color | escape }}"
+          ></span>
+        </div>
+      </div>
+    </div>
+  {%- else -%}
+    <fieldset class="variant-group-{{ group_handle }}" name="{{ option.name }}" data-index="option{{ option_index }}" data-handle="{{ group_handle }}" id="ProductSelect-{{ section_id }}-{{ product.id }}-option-{{ forloop.index0 }}">
+      <legend class="hide">{{ option.name }}</legend>
+
+      {%- for value in option.values -%}
+        {%- assign product_available = true -%}
+        {%- if product.options.size == 1 -%}
+          {%- assign product_available = product.variants[forloop.index0].available -%}
+        {%- endif -%}
+        <div class="variant-input" data-index="option{{ option_index }}" data-value="{{ value | escape }}">
+          <input type="radio" form="{{ form_id }}"
+                 {% if option.selected_value == value %} checked="checked"{% endif %}
+                 value="{{ value | escape }}" data-index="option{{ option_index }}"
+                 name="{{ option.name }}" data-variant-input
+                 class="{% unless product_available %} disabled{% endunless %}{% if is_shape %} variant-input--color-swatch{% endif %}"
+                 {% if is_shape %} data-color-name="{{ value | escape }}"{% endif %}
+                 id="ProductSelect-{{ section_id }}-{{ product.id }}-option-{{ option.name | handleize }}-{{ value | url_encode }}"
+          >
+
+          {% if is_shape %}
+            {%- comment %} Shape swatch branch - Use original_shape3 metafield {% endcomment -%}
+            {%- assign matching_variant = product.variants | where: option_key, value | first -%}
+            {%- assign english_shape = matching_variant.metafields.custom.original_shape3 | default: 'oval' -%}
+            {%- assign shape_file_name = english_shape | replace: ' ', '-' | downcase | append: '.' | append: swatch_file_extension -%}
+            {%- assign shape_image = shape_file_name | file_img_url: '1000x1000' | prepend: 'https:' | split: '?' | first -%}
+            <div class="swatch-{{ group_handle }}{% if option.selected_value == value %} swatch-{{ group_handle }}--selected{% endif %}">
+              <label for="ProductSelect-{{ section_id }}-{{ product.id }}-option-{{ option.name | handleize }}-{{ value | url_encode }}"
+                     class="variant__button-label color-swatch color-swatch--{{ english_shape | handle }}{% unless product_available %} disabled{% endunless %}"
+                     data-option-value="{{ english_shape | downcase }}"
+                     style="{% if shape_image %}background-image: url({{ shape_image }});{% endif %}"
+              ></label>
+              <span class="swatch-{{ group_handle }}-name">{{ value | escape }}</span>
+            </div>
+          {% else %}
+            <label for="ProductSelect-{{ section_id }}-{{ product.id }}-option-{{ option.name | handleize }}-{{ value | url_encode }}"
+                   class="variant__button-label{% unless product_available %} disabled{% endunless %}">
+              {{ value | escape }}
+            </label>
+          {% endif %}
+        </div>
+      {%- endfor -%}
+    </fieldset>
+  {%- endif -%}
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Handle swatch updates for material dropdowns
+  const materialDropdowns = document.querySelectorAll('select[data-color-option]');
+  materialDropdowns.forEach(dropdown => {
+    const updateSwatch = () => {
+      const selectedOption = dropdown.options[dropdown.selectedIndex];
+      const colorName = selectedOption.getAttribute('data-color-name');
+      const colorImage = selectedOption.getAttribute('data-color-image');
+      const swatchContainer = dropdown.closest('.variant-input-wrap').querySelector('.material-swatch-preview');
+      if (swatchContainer) {
+        const swatch = swatchContainer.querySelector('.color-swatch');
+        swatch.style.backgroundImage = `url(${colorImage})`;
+        swatch.setAttribute('data-color-name', colorName);
+        swatch.className = `color-swatch color-swatch--${colorName.toLowerCase().replace(/\s+/g, '-')}`;
+      }
+    };
+
+    dropdown.addEventListener('change', updateSwatch);
+    // Initialize swatch on load
+    updateSwatch();
+  });
+
+  // Existing swatch button logic for shapes
+  const swatches = document.querySelectorAll('[class^="swatch-"]:not(.swatch-select-your-material)');
+  swatches.forEach(swatch => {
+    swatch.addEventListener('click', function() {
+      const parentFieldset = this.closest('[class^="variant-group-"]');
+      if (!parentFieldset) return;
+      const groupHandle = parentFieldset.getAttribute('data-handle');
+      const swatchClass = `swatch-${groupHandle}`;
+      const selectedClass = `swatch-${groupHandle}--selected`;
+      const siblingSwatches = parentFieldset.querySelectorAll(`.${swatchClass}`);
+      siblingSwatches.forEach(s => s.classList.remove(selectedClass));
+      this.classList.add(selectedClass);
+      const radioInput = this.querySelector('input[type="radio"]');
+      if (radioInput) {
+        radioInput.checked = true;
+        radioInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  });
+});
+</script>
