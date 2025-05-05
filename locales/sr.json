@@ -1,0 +1,416 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "general": {
+    "productform": {
+      "pleaseletters": "Geben Sie Ihre Buchstaben ein",
+      "enterletters": "Geben Sie Buchstaben ein (z. B. A, ABC)",
+      "18letters": "Молимо вас да унесете 1-8 слова (А-З)",
+      "was": "Šta",
+      "enterexactly1": "Unesite tačno",
+      "letter": "Писмо"
+    },
+    "404": {
+      "title": "404 Страница није пронађена",
+      "subtext_html": "<p>Die Seite, die Sie gesucht haben, existiert nicht.</p><p><a href='{{ url }}'>Weiter einkaufen</a></p>"
+    },
+    "accessibility": {
+      "skip_to_content": "Direkt zum Inhalt springen",
+      "close_modal": "Schließen (esc)",
+      "close": "Schließen",
+      "learn_more": "Научите више"
+    },
+    "meta": {
+      "tags": "Mit „{{ tags }}“ gekennzeichnet",
+      "page": "Страница {{ Страница }}"
+    },
+    "pagination": {
+      "previous": "Претходни",
+      "next": "Weiter"
+    },
+    "password_page": {
+      "login_form_heading": "Betreten Sie den Shop mit Passwort",
+      "login_form_password_label": "лозинка",
+      "login_form_password_placeholder": "Vaša lozinka",
+      "login_form_submit": "Уђите",
+      "signup_form_email_label": "E-Mail",
+      "signup_form_success": "Wir senden Ihnen eine E-Mail, kurz bevor wir eröffnen!",
+      "admin_link_html": "Geschäftsinhaber? <a href=\"/admin\" class=\"text-link\">Hier anmelden</a>",
+      "password_link": "лозинка",
+      "powered_by_shopify_html": "Dieser Shop wird von {{ shopify }} betrieben"
+    },
+    "breadcrumbs": {
+      "home": "Startseite",
+      "home_link_title": "Zurück zur Startseite"
+    },
+    "social": {
+      "share_on_facebook": "Teilen",
+      "share_on_x": "Teilen",
+      "share_on_pinterest": "Anheften",
+      "alt_text": {
+        "share_on_facebook": "Podelite na Facebooku",
+        "share_on_x": "Auf X posten",
+        "share_on_pinterest": "Пинк на Пинтерстеру"
+      }
+    },
+    "newsletter_form": {
+      "newsletter_email": "Upišite svoj e-mail",
+      "newsletter_confirmation": "Geben Sie den Code „2025“ an der Kasse ein!",
+      "submit": "Sichern Sie sich 10 % Rabatt"
+    },
+    "search": {
+      "view_more": "Alle Ergebnisse für „{{ terms }}“ anzeigen",
+      "products": "Производи",
+      "suggestions": "Vorschläge",
+      "collections": "Колекције",
+      "pages": "Странице",
+      "articles": "Članci",
+      "no_results_html": "Suche nach „{{ terms }}“",
+      "results_for_html": "Ваша претрага за \"{{ термини }}\" открила је следеће:",
+      "title": "Suchen",
+      "placeholder": "Suchen",
+      "submit": "Suchen",
+      "cancel": "Abbrechen",
+      "search_title": "Am häufigsten gesucht",
+      "result_count": {
+        "one": "{{ count }} Ergebnis",
+        "other": "{{ count }} Ergebnisse"
+      }
+    },
+    "drawers": {
+      "navigation": "Navigation der Website",
+      "close_menu": "Menü schließen",
+      "expand_submenu": "Untermenü erweitern",
+      "collapse_submenu": "Untermenü einklappen"
+    },
+    "currency": {
+      "dropdown_label": "Währung"
+    },
+    "language": {
+      "dropdown_label": "Језик"
+    }
+  },
+  "sections": {
+    "map": {
+      "get_directions": "Wegbeschreibung abrufen",
+      "address_error": "Fehler beim Nachschlagen dieser Adresse",
+      "address_no_results": "Keine Ergebnisse für diese Adresse",
+      "address_query_limit_html": "You have exceeded the Google API usage limit. Consider upgrading to a <a href=\"https://developers.google.com/maps/premium/usage-limits\">Premium Plan</a>.",
+      "auth_error_html": "There was a problem authenticating your Google Maps account. Create and enable the <a href=\"https://developers.google.com/maps/documentation/javascript/get-api-key\">JavaScript API</a> and <a href=\"https://developers.google.com/maps/documentation/geocoding/get-api-key\">Geocoding API</a> permissions of your app."
+    },
+    "slideshow": {
+      "play_slideshow": "Diashow abspielen",
+      "pause_slideshow": "Diashow pausieren"
+    }
+  },
+  "blogs": {
+    "article": {
+      "view_all": "Alle anzeigen",
+      "tags": "Tagovi",
+      "read_more": "Nastavi čitanje",
+      "back_to_blog": "Zurück zu {{ title }}"
+    },
+    "comments": {
+      "title": "Ostavite komentar",
+      "name": "Име",
+      "email": "E-Mail",
+      "message": "порука",
+      "post": "Kommentar posten",
+      "moderated": "Bitte beachten Sie, Kommentare müssen vor der Veröffentlichung genehmigt werden",
+      "success_moderated": "Ihr Kommentar wurde erfolgreich veröffentlicht. Wir werden ihn in Kürze freischalten, da unser Blog moderiert wird.",
+      "success": "Ihr Kommentar wurde erfolgreich veröffentlicht! Vielen Dank!",
+      "with_count": {
+        "one": "{{ count }} Kommentar",
+        "other": "{{ count }} Kommentare"
+      }
+    }
+  },
+  "cart": {
+    "urgency_timer": {
+      "order_within": "Bestellen Sie innerhalb von",
+      "to_take": "да узме",
+      "ends_in": "se završava za",
+      "discount_off": "{{discount}} % RABATT!",
+      "save": "Speichern",
+      "you_save": "и спаси"
+    },
+    "general": {
+      "title": "Warenkorb",
+      "lifetime_warranty": "Lebenslange Garantie",
+      "secure_checkout": "Sicheren Checkout durchführen",
+      "remove": "Entfernen",
+      "free": "Бесплатно",
+      "delivery": "испорука",
+      "note": "Bestellnotiz",
+      "subtotal": "Gesamtbestellung",
+      "discounts": "Rabatte",
+      "shipping_at_checkout": "Lieferung, Steuern und Rabattcodes werden an der Kasse berechnet.",
+      "update": "Warenkorb aktualisieren",
+      "checkout": "Zur Kasse Gehen",
+      "empty": "Ihr Warenkorb ist derzeit leer.",
+      "continue_browsing_html": "<a href='{{ url }}'>nastavite kupovinu</a>",
+      "close_cart": "Warenkorb schließen",
+      "reduce_quantity": "Reduziere Artikelanzahl um eins",
+      "increase_quantity": "Erhöhe Artikelmenge um eins",
+      "terms": "Ich stimme den Allgemeinen Geschäftsbedingungen zu",
+      "terms_html": "Ich stimme den <a href='{{ url }}' target='_blank'>Allgemeinen Geschäftsbedingungen</a> zu",
+      "terms_confirm": "Морате се сложити са условима и условима продаје да бисте проверили",
+      "max_quantity": "Можете имати само {{ количина }} од {{ наслов }} у вашој торби."
+    },
+    "label": {
+      "price": "Цена",
+      "quantity": "количина",
+      "total": "укупно"
+    }
+  },
+  "collections": {
+    "general": {
+      "catalog_title": "Katalog",
+      "all_of_collection": "Alle anzeigen",
+      "view_all_products_html": "Alle anzeigen<br>{{ count }} Produkte",
+      "see_more": "Pokaži više",
+      "see_less": "Weniger anzeigen",
+      "no_matches": "Извините, нема производа у овој колекцији.",
+      "items_with_count": {
+        "one": "{{ count }} Produkt",
+        "other": "{{ count }} Produkte"
+      }
+    },
+    "sorting": {
+      "title": "Sortieren"
+    },
+    "filters": {
+      "title_tags": "Филтер",
+      "all_tags": "Сви производи",
+      "categories_title": "Категорије"
+    }
+  },
+  "contact": {
+    "form": {
+      "name": "Име",
+      "email": "E-Mail",
+      "phone": "Telefonnummer",
+      "message": "порука",
+      "send": "Senden",
+      "post_success": "Hvala što ste nas kontaktirali. Odgovorićemo vam u najkraćem mogućem roku."
+    }
+  },
+  "customer": {
+    "account": {
+      "title": "Мој рачун",
+      "details": "Kontodetails",
+      "view_addresses": "Adressen anzeigen",
+      "return": "Враћање на рачун"
+    },
+    "activate_account": {
+      "title": "Konto aktivieren",
+      "subtext": "Erstellen Sie Ihr Passwort, um Ihr Konto zu aktivieren.",
+      "password": "лозинка",
+      "password_confirm": "Passwort bestätigen",
+      "submit": "Konto aktivieren",
+      "cancel": "Einladung ablehnen"
+    },
+    "addresses": {
+      "title": "Adressen",
+      "default": "дефолт",
+      "add_new": "Adresse hinzufügen",
+      "edit_address": "Edit adresa",
+      "first_name": "Прво име",
+      "last_name": "Nachname",
+      "company": "Компанија",
+      "address1": "Adresa 1",
+      "address2": "Adresse 2",
+      "city": "Град",
+      "country": "Land",
+      "province": "Провинција",
+      "zip": "Postleitzahl",
+      "phone": "Телефон",
+      "set_default": "Подешавање као дефолт адреса",
+      "add": "Adresse hinzufügen",
+      "update": "Adresse aktualisieren",
+      "cancel": "Abbrechen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "delete_confirm": "Sind Sie sicher, dass Sie diese Adresse löschen möchten?"
+    },
+    "login": {
+      "title": "Anmelden",
+      "email": "E-Mail",
+      "password": "лозинка",
+      "forgot_password": "Passwort vergessen?",
+      "sign_in": "Anmelden",
+      "cancel": "Zurück zum Shop",
+      "guest_title": "Настави као гост",
+      "guest_continue": "Fortfahren"
+    },
+    "orders": {
+      "title": "Bestellverlauf",
+      "order_number": "Наредба",
+      "date": "Датум",
+      "payment_status": "Zahlungsstatus",
+      "fulfillment_status": "Status der Ausführung",
+      "total": "укупно",
+      "none": "Sie haben noch keine Bestellungen aufgegeben."
+    },
+    "order": {
+      "title": "Bestellung {{ name }}",
+      "date_html": "Bestellt am {{ date }}",
+      "cancelled_html": "Bestellung storniert am {{ date }}",
+      "cancelled_reason": "Grund: {{ reason }}",
+      "billing_address": "Rechnungsadresse",
+      "payment_status": "Zahlungsstatus",
+      "shipping_address": "Lieferadresse",
+      "fulfillment_status": "Status der Ausführung",
+      "discount": "Popust",
+      "shipping": "испорука",
+      "tax": "Steuer",
+      "product": "Производ",
+      "sku": "Ску",
+      "price": "Цена",
+      "quantity": "количина",
+      "total": "укупно",
+      "fulfilled_at_html": "Erfüllt am {{ date }}",
+      "subtotal": "Subtotalno"
+    },
+    "recover_password": {
+      "title": "Setzen Sie Ihr Passwort zurück",
+      "email": "E-Mail",
+      "submit": "Absenden",
+      "cancel": "Abbrechen",
+      "subtext": "Ми ћемо вам послати е-маил да поново подесите свој лозинку.",
+      "success": "Послали смо вам е-маил са линком за ажурирање вашег лозинке."
+    },
+    "reset_password": {
+      "title": "Setze Kontopasswort zurück",
+      "subtext": "Upišite novu lozinku za {{ email }}",
+      "password": "лозинка",
+      "password_confirm": "Passwort Bestätigen",
+      "submit": "Passwort zurücksetzen"
+    },
+    "register": {
+      "title": "Konto Erstellen",
+      "first_name": "Прво име",
+      "last_name": "Nachname",
+      "email": "E-Mail",
+      "password": "лозинка",
+      "submit": "Креирајте",
+      "cancel": "Zurück zum Shop"
+    }
+  },
+  "home_page": {
+    "onboarding": {
+      "product_title": "Beispielprodukt",
+      "product_description": "In diesem Bereich können Sie die Details Ihres Produkts beschreiben. Erzählen Sie Kunden etwas über das Aussehen, das Gefühl und den Stil Ihres Produkts. Fügen Sie Informationen zu Farbe, verwendeten Materialien, Größenangaben und dem Herstellungsort hinzu.",
+      "collection_title": "Примерна колекција",
+      "no_content": "Dieser Abschnitt enthält derzeit keinen Inhalt. Fügen Sie diesem Abschnitt über die Seitenleiste Inhalte hinzu."
+    }
+  },
+  "layout": {
+    "cart": {
+      "title": "Warenkorb"
+    },
+    "customer": {
+      "account": "Konto",
+      "log_out": "Abmelden",
+      "log_in": "Log u",
+      "create_account": "Konto erstellen"
+    },
+    "footer": {
+      "social_platform": "{{ name }} auf {{ platform }}"
+    }
+  },
+  "products": {
+    "general": {
+      "color_swatch_trigger": "боја",
+      "size_trigger": "Величина",
+      "size_chart": "Größentabelle",
+      "save_html": "Spare {{ saved_amount }}",
+      "collection_return": "Zurück zu {{ collection }}",
+      "next_product": "Weiter: {{ title }}",
+      "sale": "Rasprodaja",
+      "sale_price": "Продаја цена",
+      "regular_price": "Regulärer Preis",
+      "from_text_html": "ab {{ price }}",
+      "recent_products": "Kürzlich angesehen",
+      "reviews": "Ревизије"
+    },
+    "product": {
+      "description": "Опис",
+      "in_stock_label": "Auf Lager, versandbereit",
+      "stock_label": {
+        "one": "Niedriger Bestand – {{ count }} Artikel übrig",
+        "other": "Niedriger Bestand – {{ count }} Artikel übrig"
+      },
+      "sold_out": "Ausverkauft",
+      "unavailable": "недоступни",
+      "quantity": "количина",
+      "add_to_cart": "In den Warenkorb legen",
+      "preorder": "Vorbestellen",
+      "include_taxes": "MwSt. inklusive.",
+      "shipping_policy_html": "<a href='{{ link }}'>Lieferung</a> wird an der Kasse berechnet.",
+      "will_not_ship_until": "Versandbereit bis zum {{ date }}",
+      "will_be_in_stock_after": "Wieder verfügbar ab {{ date }}",
+      "waiting_for_stock": "Nachbestellt, baldige Lieferung",
+      "view_in_space": "Im eigenen Raum anzeigen",
+      "view_in_space_label": "Im Raum anzeigen, lädt Artikel im Augmented-Reality-Fenster"
+    }
+  },
+  "store_availability": {
+    "general": {
+      "view_store_info": "Shop-Informationen anzeigen",
+      "check_other_stores": "Verfügbarkeit in anderen Geschäften prüfen",
+      "pick_up_available": "Pickup dostupni",
+      "pick_up_currently_unavailable": "Abholung derzeit nicht verfügbar",
+      "pick_up_available_at_html": "Abholung verfügbar bei <strong>{{ location_name }}</strong>",
+      "pick_up_unavailable_at_html": "Abholung derzeit nicht verfügbar bei <strong>{{ location_name }}</strong>"
+    }
+  },
+  "gift_cards": {
+    "issued": {
+      "title_html": "Hier ist Ihre Geschenkkarte im Wert von {{ value }} für {{ shop }}!",
+      "subtext": "Hier ist Ihre Geschenkkarte!",
+      "disabled": "Deaktiviert",
+      "expired": "Abgelaufen am {{ expiry }}",
+      "active": "Läuft ab am {{ expiry }}",
+      "redeem": "Verwenden Sie diesen Code an der Kasse, um Ihre Geschenkkarte einzulösen",
+      "shop_link": "Mit Einkaufen Beginnen",
+      "print": "Drucken",
+      "add_to_apple_wallet": "Zu Apple Wallet hinzufügen"
+    }
+  },
+  "recipient": {
+    "form": {
+      "checkbox": "Želim da pošaljem ovo kao poklon",
+      "email_label": "E-Mail-Empfänger",
+      "email": "E-Mail",
+      "name_label": "Name des Empfängers (optional)",
+      "name": "Име",
+      "message_label": "Nachricht (optional)",
+      "message": "порука",
+      "max_characters": "Maximal {{ max_chars }} Zeichen",
+      "send_on_label": "Am (optional) senden"
+    }
+  },
+  "date_formats": {
+    "month_day_year": "%d. %b %Y"
+  },
+  "shopify": {
+    "checkout": {
+      "marketing": {
+        "accept_marketing_checkbox_label": "Senden Sie mir Sendungsverfolgungs-Updates per E-Mail"
+      }
+    }
+  },
+  "customer_accounts": {
+    "order_details": {
+      "marketing_checkbox_label": "Senden Sie mir Sendungsverfolgungs-Updates per E-Mail"
+    }
+  }
+}
